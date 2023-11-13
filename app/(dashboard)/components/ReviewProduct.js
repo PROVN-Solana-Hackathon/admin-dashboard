@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
-
 import axios from "axios";
 import QRCode from "qrcode";
+import { createAlgorandNFT } from "@/app/utils/algorand";
 
 const ReviewProduct = ({
   product,
@@ -17,14 +17,15 @@ const ReviewProduct = ({
   console.log({ imageUrls });
   const [mintAddress, setMintAddress] = useState("");
   const [first, ...images] = imageUrls;
+  const [loading, setLoading] = useState(false);
 
   const createNft = async () => {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_UNDERDOG_API_KEY}`,
+    // const config = {
+    //   headers: {
+    //     Authorization: `Bearer ${process.env.NEXT_PUBLIC_UNDERDOG_API_KEY}`,
 
-      },
-    };
+    //   },
+    // };
 
     const data = {
       ...product,
@@ -35,23 +36,48 @@ const ReviewProduct = ({
       },
     };
 
-    const nftResponse = await axios.post(`${process.env.NEXT_PUBLIC_UNDERDOG_API_ENDPOINT}/v2/projects/1/nfts`,
-        data,
-        config
-      )
+    try {
+      setLoading(true);
+      const res = await createAlgorandNFT(first, data);
 
-      const nftId = await nftResponse.data.nftId
-      const projectId = await nftResponse.data.projectId
+      if (res.nftUrl) {
+        generateQRCode(res.nftUrl);
+      }
+
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      alert('Something went wrong, please try again');
+    }
+
+    // const nftResponse = await axios.post(`${process.env.NEXT_PUBLIC_UNDERDOG_API_ENDPOINT}/v2/projects/1/nfts`,
+    //     data,
+    //     config
+    //   )
+
+    //   const nftId = await nftResponse.data.nftId
+    //   const projectId = await nftResponse.data.projectId
       
-      const mintDataResponse = await axios.get(`https://devnet.underdogprotocol.com/v2/projects/${projectId}/nfts/${nftId}`, config)
-     console.log(mintDataResponse)
+    //   const mintDataResponse = await axios.get(`https://devnet.underdogprotocol.com/v2/projects/${projectId}/nfts/${nftId}`, config)
+    //  console.log(mintDataResponse)
   
   };
+
   const generateQRCode = (address) => {
-    QRCode.toDataURL(
-      `https://xray.helius.xyz/token/${address}?network=devnet`
-    ).then(setQrcode);
+    // QRCode.toDataURL(
+    //   `https://xray.helius.xyz/token/${address}?network=devnet`
+    // ).then(setQrcode);
+    QRCode.toDataURL(address).then(setQrcode);
   };
+
+  useEffect(() => {
+    console.log(qrcode);
+
+    if (qrcode) {
+      setStep((prev) => prev + 1);
+    }
+  }, [qrcode]);
 
   return (
     <div className="w-[50%] mx-auto">
@@ -121,8 +147,9 @@ const ReviewProduct = ({
           <button
             className="bg-[#2F79D7] text-white rounded-full my-4 p-2"
             onClick={createNft}
+            disabled={loading}
           >
-            Confirm and View Codes
+            {loading ? 'Loading...' : 'Confirm and View Codes'}
           </button>
           <button
             className="bg-[#292929] text-white rounded-full p-2"
