@@ -77,8 +77,9 @@ const CreateForm = ({
 
   const getDownloadableURL = () => {
     images.forEach((image) => {
-      const uniqueName = new Date().getTime() + image.id + image.name;
-      const imageRef = storageRef(storage, `products/${uniqueName}`);
+      // const uniqueName = new Date().getTime() + image.id + image.name;
+      const uniqueName = String(new Date().getTime());
+      const imageRef = storageRef(storage, `items/${uniqueName}`);
       uploadBytes(imageRef, image).then((snapshot) => {
         getDownloadURL(snapshot.ref).then((url) => {
           setImageUrls((prev) => [...prev, url]);

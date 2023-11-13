@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.1",
+    "@types/crypto-js": "^4.2.1",
+    "algosdk": "^2.7.0",
     "axios": "^1.5.1",
+    "crypto-js": "^4.2.0",
     "firebase": "^10.4.0",
     "next": "latest",
     "qrcode": "^1.5.3",
